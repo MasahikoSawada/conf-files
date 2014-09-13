@@ -1,0 +1,3 @@
+\pset border 2
+\set PROMPT2 '[%/][%>](%l)%R%# '
+\set PROMPT1 '[%/][%>](%l)%R%# '
