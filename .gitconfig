@@ -1,0 +1,16 @@
+[user]
+	name = Masahiko Sawada
+	email = sawada.mshk@gmail.com
+[core]
+	editor = emacs
+[color]
+	ui = true
+[alias]
+        ch = checkout
+        br = branch
+        co = commit
+        st = status
+        di = diff
+        br = branch -v
+        hist = log --graph --date-order -C -M --pretty=format:\"<%h> %ad | %Cgreen%d%Creset %s [%an]\" --date=short
+        list = log --pretty=format:\"<%h> %ad [%an] %Cgreen%d%Creset %s\" --date=short

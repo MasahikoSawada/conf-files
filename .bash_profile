@@ -8,6 +8,10 @@ fi
 # User specific environment and startup programs
 
 alias diff='colordiff'
+alias gg='ps aux | grep'
+alias server='redis-server'
+alias cli='redis-cli'
+
 PATH=$PATH:$HOME/bin
 export PS1="\u [\W] \\$ "
 export PATH
