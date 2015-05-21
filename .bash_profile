@@ -11,6 +11,7 @@ alias diff='colordiff'
 alias gg='ps aux | grep'
 alias server='redis-server'
 alias cli='redis-cli'
+alias emacs='emacs -nw'
 
 PATH=$PATH:$HOME/bin
 export PS1="\u [\W] \\$ "
