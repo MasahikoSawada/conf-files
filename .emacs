@@ -8,6 +8,20 @@
 (setq auto-save-default nil)
 (global-set-key "\C-h" 'delete-backward-char)
 
+(setq diff-auto-refine-mode nil)
+(defun diff-mode-setup-faces ()
+  ;; 追加された行は緑で表示
+  (set-face-attribute 'diff-added nil
+                      :foreground "dark green")
+  ;; 削除された行は赤で表示
+  (set-face-attribute 'diff-removed nil
+                      :foreground "dark red")
+  ;; 文字単位での変更箇所は色を反転して強調
+  (set-face-attribute 'diff-refine-change nil
+                      :foreground nil :background nil
+                      :weight 'bold :inverse-video t))
+(add-hook 'diff-mode-hook 'diff-mode-setup-faces)
+
 ;; -*- mode: emacs-lisp -*-
 
 ;; This file contains code to set up Emacs to edit PostgreSQL source
