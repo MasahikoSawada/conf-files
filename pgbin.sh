@@ -1,5 +1,16 @@
 PGBASE=/home/masahiko/pgsql
 
+# Available functions are;
+# - start [version]
+# - restart [version]
+# - stop [version
+# - install [version]
+# - init [version]
+# - full_setup [version]
+# - sync_rep [version] [num]
+# - rebuld [version] [options]
+# - list
+
 function error()
 {
     echo "[ERROR] : " $@
@@ -17,7 +28,7 @@ function start()
 	PORT=5`echo $VERSION | tr -d "."`
     fi
 
-    bin/pg_ctl start -D data
+    bin/pg_ctl start -D data -o "-p $PORT"
     cd $P
 }
 
@@ -75,7 +86,7 @@ function init()
     cd $P
 }
 
-function install_setup()
+function full_setup()
 {
     VERSION=$1
     ORIG_PWD=`pwd`
@@ -89,6 +100,23 @@ function install_setup()
 
     init $VERSION
     
+    cd ${ORIG_PWD}
+}
+
+function rebuild()
+{
+    VERSION=$1
+    shift
+    OPTIONS=$@
+    ORIG_PWD=`pwd`
+
+    cd $PGBASE/source/postgresql-${VERSION}
+    ./configure --prefix=$PGBASE/$VERSION --enable-debug --enable-cassert ${OPTIONS} CFLAGS=-g
+
+    make clean -j 4 -s
+    make -j 4 -s
+    make install -j 4 -s
+
     cd ${ORIG_PWD}
 }
 
