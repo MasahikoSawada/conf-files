@@ -81,6 +81,7 @@ function init()
     P=`pwd`
 
     cd $PGBASE/$VERSION
+    rm -rf data
     bin/initdb -D data -E UTF8 --no-locale
 
     cd $P
