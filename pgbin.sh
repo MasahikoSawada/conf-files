@@ -1,4 +1,3 @@
-#!/bin/bash
 PGBASE=/home/masahiko/pgsql
 
 # Available functions are;
@@ -11,7 +10,7 @@ PGBASE=/home/masahiko/pgsql
 # - sync_rep [version] [num]
 # - rebuld [version] [options]
 # - pp { [version] ...} [options for psql including -c option]
-# - p [version] [connection option for psql]
+# - p [version]
 # - list
 
 function error()
@@ -114,35 +113,18 @@ function rebuild()
     cd ${ORIG_PWD}
 }
 
-function s_to_version()
-{
-    if [ "$1" != "master" ];then
-	VERSION_1=`echo $1 | cut -b1`
-	VERSION_2=`echo $1 | cut -b2`
-	VERSION_3=`echo $1 | cut -b3-`
-	echo "${VERSION_1}.${VERSION_2}.${VERSION_3}"
-	return
-    else
-	echo "master"
-	return
-    fi
-}
-
-function s_to_port()
-{
-    if [ "$1" != "master" ];then
-	echo "5$1"
-	return
-    else
-	echo "5432"
-	return
-    fi
-}
 
 function pp()
 {
+    unset command_opt
+    unset before_command
+    unset options
+
     options=""
     versions=()
+    command_opt=""
+    before_command=""
+    command=""
     for OPT in "$@"
     do
 	if [ "$before_command" == "true" ];then
@@ -152,7 +134,7 @@ function pp()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master')
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9])
 		versions=("${versions[@]}" "$OPT")
 		shift
 		;;
@@ -184,6 +166,17 @@ function pp()
 
 function p()
 {
+    unset command_opt
+    unset before_command
+    unset options
+    unset command
+
+    options=""
+    version=""
+    command_opt=""
+    before_command=""
+    command=""
+
     for OPT in "$@"
     do
 	if [ "$before_command" == "true" ];then
@@ -193,7 +186,7 @@ function p()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master')
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9])
 		version="$OPT"
 		shift
 		;;
@@ -208,10 +201,15 @@ function p()
 	esac
     done
 
+    if [ "$version" == "" ];then
+	version="master"
+    fi
+
     VERSION=`s_to_version $version`
     PORT=`s_to_port $version`
 
-    $PGBASE/$VERSION/bin/psql -d postgres -p $PORT "$options"
+    c="$PGBASE/$VERSION/bin/psql -d postgres -p $PORT $options $command_opt $command"
+    eval "$c"
 }
 
 function sync_rep()
@@ -231,3 +229,52 @@ function list()
     ls $PGBASE/
 }
 
+
+# Common functions
+function s_to_version()
+{
+    case $1 in
+	master|rmaster|node[0-9])
+	    echo "master"
+	    return
+	    ;;
+	*)
+	    VERSION_1=`echo $1 | cut -b1`
+	    VERSION_2=`echo $1 | cut -b2`
+	    VERSION_3=`echo $1 | cut -b3-`
+	    echo "${VERSION_1}.${VERSION_2}.${VERSION_3}"
+	    return
+    esac
+}
+
+function s_to_port()
+{
+    case $1 in
+	master)
+	    echo "5432"
+	    return
+	    ;;
+	rmaster)
+	    echo "5550"
+	    return
+	    ;;
+	node[0-9])
+	    node_id=`echo $1 | cut -b 5`
+	    echo "555${node_id}"
+	    return
+	    ;;
+	*)
+	    echo "5$1"
+	    return
+    esac
+}
+
+function port_test()
+{
+    VERSION=`s_to_version $1`
+    PORT=`s_to_port $1`
+
+    echo "Argument = $1"
+    echo "version = $VERSION"
+    echo "port = $PORT"
+}
