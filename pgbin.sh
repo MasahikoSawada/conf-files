@@ -22,30 +22,33 @@ function start()
 {
     VERSION=`s_to_version $1`
     PORT=`s_to_port $1`
+    DATA=`s_to_dir $1`
     P=`pwd`
     cd $PGBASE/$VERSION
 
-    bin/pg_ctl start -D data -o "-p $PORT" -c
+    bin/pg_ctl start -D $DATA -o "-p $PORT" -c
     cd $P
 }
 
 function restart()
 {
     VERSION=`s_to_version $1`
+    DATA=`s_to_dir $1`
     PORT=`s_to_port $1`
     P=`pwd`
     cd $PGBASE/$VERSION
 
-    bin/pg_ctl restart -D data -mf -c
+    bin/pg_ctl restart -D $DATA -mf -c
     cd $P
 }
 
 function stop()
 {
     VERSION=`s_to_version $1`
+    DATA=`s_to_dir $1`
     P=`pwd`
     cd $PGBASE/$VERSION
-    bin/pg_ctl stop -D data -mf
+    bin/pg_ctl stop -D $DATA -mf
     cd $P
 }
 
@@ -134,7 +137,7 @@ function pp()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9])
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9] | shd[0-9] | pri)
 		versions=("${versions[@]}" "$OPT")
 		shift
 		;;
@@ -158,7 +161,7 @@ function pp()
 	VERSION=`s_to_version $version`
 	PORT=`s_to_port $version`
 
-	echo "==== $VERSION ===="
+	echo "==== $VERSION($version) ===="
 	c="$PGBASE/$VERSION/bin/psql -d postgres -p $PORT $options $command_opt $command"
 	eval "$c"
     done
@@ -186,7 +189,7 @@ function p()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9])
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9] | shd[0-9] | pri)
 		version="$OPT"
 		shift
 		;;
@@ -231,10 +234,29 @@ function list()
 
 
 # Common functions
+
+function s_to_dir()
+{
+    case $1 in
+	rmaster)
+	    echo "master"
+	    return
+	    ;;
+	master | [0-9]*)
+	    echo "data"
+	    return
+	    ;;
+	*)
+	    echo $1
+	    return
+    esac
+}
+
+# Convert string to version number which is used for directory name
 function s_to_version()
 {
     case $1 in
-	master|rmaster|node[0-9])
+	master|rmaster|node[0-9]|shd[0-9]|pri)
 	    echo "master"
 	    return
 	    ;;
@@ -261,6 +283,15 @@ function s_to_port()
 	node[0-9])
 	    node_id=`echo $1 | cut -b 5`
 	    echo "555${node_id}"
+	    return
+	    ;;
+	shd[0-9])
+	    shd_id=`echo $1 | cut -b 4`
+	    echo "444${shd_id}"
+	    return
+	    ;;
+	pri)
+	    echo "4440"
 	    return
 	    ;;
 	*)
