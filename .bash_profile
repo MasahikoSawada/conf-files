@@ -45,8 +45,8 @@ export PERL5LIB=/home/masahiko/pgsql/source/postgresql/src/test/perl
 export TESTDIR='/home/masahiko/pgsql/source/postgresql/src/test/recovery'
 export PATH="/home/masahiko/pgsql/source/postgresql/tmp_install/home/masahiko/pgsql/master/bin:$PATH"
 export LD_LIBRARY_PATH="/home/masahiko/pgsql/source/postgresql/tmp_install/home/masahiko/pgsql/master/lib"
-export PGPORT='65432'
 export PG_REGRESS='/home/masahiko/pgsql/source/postgresql/src/test/recovery/../../../src/test/regress/pg_regress'
+#export PGPORT='65432'
 
 # Set import path
 export PYTHONPATH=~/conf-files/PostgresNode/
