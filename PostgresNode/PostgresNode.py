@@ -99,11 +99,15 @@ class PostgresNode:
         print self.pgdata
         print self.pgbin
 
-master = PostgresNode("data")
-master.init(replication = True)
-master.start()
-backup = master.backup("hoge_backup")
-
-standby = PostgresNode("standby")
-standby.init_as_standby(backup, master)
-standby.start()
+#
+# Sample code.
+#
+#master = PostgresNode("data")
+#master.init(replication = True)
+#master.start()
+#backup = master.backup("hoge_backup")
+#
+#standby = PostgresNode("standby")
+#standby.init_as_standby(backup, master)
+#standby.start()
+#
