@@ -50,3 +50,4 @@ export PG_REGRESS='/home/masahiko/pgsql/source/postgresql/src/test/recovery/../.
 
 # Set import path
 export PYTHONPATH=~/conf-files/PostgresNode/
+export PYTHONSTARTUP=~/conf-files/mystartup.py
