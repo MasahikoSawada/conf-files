@@ -1,15 +1,65 @@
 import os
 import random
+import re
 
-MYPGHOME = "/home/masahiko/pgsql/master"
+# versionstr is like "935", "9112" and "101"
+# version is "9.3.5", "9.1.12" and "10.1"
+def versionstr_to_version(string):
+    # HEAD
+    if string == "master":
+        return "master"
+    # version 7 - 9
+    elif string[0] in {'7', '8', '9'}:
+        major_1 = string[0]
+        major_2 = string[1]
+        minor = string[2:]
+        return major_1 + "." + major_2 + "." + minor
+    # version 10 -
+    else:
+        major = string[0:2]
+        minor = string[2:]
+        return major + "." + minor
+
+# versionstr is like "935", "9112" and "101"
+# port would be like "5935", "59112" and "5101"
+def versionstr_to_port(string):
+    # HEAD
+    if string == "master":
+        return 5432
+    # version 7 - 9
+    else:
+        return "5" + string
+
+def name_to_port(string, port):
+    if string == "data":
+        return port
+    elif string == "master":
+        return 5432
+    elif string == "rmaster":
+        return 5550
+    elif re.match(r"node[0-9]$", string):
+        node_id = string[4]
+        return "555" + node_id
+    elif string == "pri":
+        return 4440
+    elif re.match(r"shd[0-9]$", string):
+        shd_id = string[3]
+        return "444" + shd_id
+    else:
+        return port
 
 class PostgresNode:
-    def __init__(self, name, init = False):
+    def __init__(self, name = "data", init = False, port = 0):
         self.name = name
-        self.port = 5432 + random.randint(1, 1000)
-        self.pgdata = MYPGHOME + "/" + name + "/"
-        self.pgbin = MYPGHOME + "/" + "bin/"
-        self.pgbackup = MYPGHOME + "/" + name + "/backup/"
+        if port == 0:
+            self.port = versionstr_to_port(PGVERSION) # get port from version num
+            self.port = name_to_port(self.name, self.port) # if given special data name, port is changed
+        else:
+            self.port = port
+        self.pghome = MYPGHOME + versionstr_to_version(PGVERSION)
+        self.pgdata = self.pghome + "/" + name + "/"
+        self.pgbin = self.pghome + "/" + "bin/"
+        self.pgbackup = self.pghome + "/" + name + "/backup/"
         self.enable_repl = False
 
         # Do initdb as well
@@ -94,10 +144,19 @@ class PostgresNode:
         os.system(self.pgbin + "pg_ctl promote -D " + self.pgdata)
 
     def show(self):
-        print self.name
-        print self.port
-        print self.pgdata
-        print self.pgbin
+        print "==================== \"%s\" Node Info ====================" % self.name
+        print "VERSION\t\t:\t%s" % PGVERSION
+        print "MYPGHOME\t:\t%s" % MYPGHOME
+        print "name\t\t:\t%s" % self.name
+        print "port\t\t:\t%s" % self.port
+        print "pghome\t\t:\t%s" % self.pghome
+        print "pgdata\t\t:\t%s" % self.pgdata
+        print "pgbin\t\t:\t%s" % self.pgbin
+        print "pgbackup\t:\t%s" % self.pgbackup
+        print "========================================================="
+
+MYPGHOME = "/home/masahiko/pgsql/"
+PGVERSION = os.environ.get("MY_PGVERSION")
 
 #
 # Sample code.
