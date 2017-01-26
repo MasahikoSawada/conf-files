@@ -47,3 +47,6 @@ export PATH="/home/masahiko/pgsql/source/postgresql/tmp_install/home/masahiko/pg
 export LD_LIBRARY_PATH="/home/masahiko/pgsql/source/postgresql/tmp_install/home/masahiko/pgsql/master/lib"
 export PGPORT='65432'
 export PG_REGRESS='/home/masahiko/pgsql/source/postgresql/src/test/recovery/../../../src/test/regress/pg_regress'
+
+# Set import path
+export PYTHONPATH=~/conf-files/PostgresNode/
