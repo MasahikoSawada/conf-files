@@ -73,11 +73,12 @@ function install_pg()
 function init()
 {
     VERSION=`s_to_version $1`
+    DATA=`s_to_dir $1`
     P=`pwd`
 
     cd $PGBASE/$VERSION
-    rm -rf data
-    bin/initdb -D data -E UTF8 --no-locale
+    rm -rf -D $DATA
+    bin/initdb -D $DATA -E UTF8 --no-locale
 
     cd $P
 }
@@ -87,14 +88,14 @@ function full_setup()
     VERSION=`s_to_version $1`
     ORIG_PWD=`pwd`
 
-    install $VERSION
+    install_pg $1
     
     cd $PGBASE/source/postgresql-${VERSION}
     ./configure --prefix=$PGBASE/$VERSION --enable-debug --enable-cassert CFLAGS=-g
     make -j 4 -s
     make install -j 4 -s
 
-    init $VERSION
+    init $1
     
     cd ${ORIG_PWD}
 }
@@ -240,6 +241,10 @@ function s_to_dir()
     case $1 in
 	rmaster)
 	    echo "master"
+	    return
+	    ;;
+	node[0-9])
+	    echo $1
 	    return
 	    ;;
 	master | [0-9]*)
