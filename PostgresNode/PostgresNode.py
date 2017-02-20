@@ -143,6 +143,13 @@ class PostgresNode:
     def promote(self):
         os.system(self.pgbin + "pg_ctl promote -D " + self.pgdata)
 
+    # psql
+    def psql(self, sql, dbname='postgres', psqlrc=True):
+        if psqlrc:
+            os.system(self.pgbin + "psql -d " + dbname + " -p " + str(self.port) + " -c \"" + sql + "\"")
+        else:
+            os.system(self.pgbin + "psql -d " + dbname + " -p " + str(self.port) + " -Xc \"" + sql + "\"")
+
     def show(self):
         print "==================== \"%s\" Node Info ====================" % self.name
         print "VERSION\t\t:\t%s" % PGVERSION
