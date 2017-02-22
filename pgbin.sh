@@ -247,6 +247,10 @@ function s_to_dir()
 	    echo $1
 	    return
 	    ;;
+	rmaster)
+	    echo $1
+	    return
+	    ;;
 	master | [0-9]*)
 	    echo "data"
 	    return
