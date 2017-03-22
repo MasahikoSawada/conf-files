@@ -30,6 +30,8 @@ export PATH=/home/masahiko/pgsql/master/bin:/home/masahiko/go/go/bin:$PATH
 export PATH=/usr/local/bin/git:$PATH
 
 export PATH="$HOME/.rbenv/bin:$PATH"
+export GOPATH=/home/masahiko/gopath
+
 eval "$(rbenv init -)"
 
 source ~/conf-files/pgbin.sh

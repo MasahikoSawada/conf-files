@@ -20,35 +20,46 @@ function error()
 
 function start()
 {
-    VERSION=`s_to_version $1`
-    PORT=`s_to_port $1`
-    DATA=`s_to_dir $1`
     P=`pwd`
-    cd $PGBASE/$VERSION
 
-    bin/pg_ctl start -D $DATA -o "-p $PORT" -c
+    for OPT in "$@"
+    do
+	VERSION=`s_to_version $OPT`
+	PORT=`s_to_port $OPT`
+	DATA=`s_to_dir $OPT`
+	cd $PGBASE/$VERSION
+
+	bin/pg_ctl start -D $DATA -o "-p $PORT" -c
+    done
+
     cd $P
 }
 
 function restart()
 {
-    VERSION=`s_to_version $1`
-    DATA=`s_to_dir $1`
-    PORT=`s_to_port $1`
     P=`pwd`
-    cd $PGBASE/$VERSION
+    for OPT in "$@"
+    do
+	VERSION=`s_to_version $OPT`
+	DATA=`s_to_dir $OPT`
+	PORT=`s_to_port $OPT`
+	cd $PGBASE/$VERSION
 
-    bin/pg_ctl restart -D $DATA -mf -c
+	bin/pg_ctl restart -D $DATA -mf -c
+    done
     cd $P
 }
 
 function stop()
 {
-    VERSION=`s_to_version $1`
-    DATA=`s_to_dir $1`
     P=`pwd`
-    cd $PGBASE/$VERSION
-    bin/pg_ctl stop -D $DATA -mf
+    for OPT in "$@"
+    do
+	VERSION=`s_to_version $OPT`
+	DATA=`s_to_dir $OPT`
+	cd $PGBASE/$VERSION
+	bin/pg_ctl stop -D $DATA -mf
+    done
     cd $P
 }
 
