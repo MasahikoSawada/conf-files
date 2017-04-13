@@ -83,14 +83,16 @@ function install_pg()
 
 function init()
 {
-    VERSION=`s_to_version $1`
-    DATA=`s_to_dir $1`
     P=`pwd`
 
-    cd $PGBASE/$VERSION
-    rm -rf -D $DATA
-    bin/initdb -D $DATA -E UTF8 --no-locale
-
+    for OPT in "$@"
+    do
+	VERSION=`s_to_version $OPT`
+	DATA=`s_to_dir $OPT`
+	cd $PGBASE/$VERSION
+	rm -rf $DATA
+	bin/initdb -D $DATA -E UTF8 --no-locale
+    done
     cd $P
 }
 
