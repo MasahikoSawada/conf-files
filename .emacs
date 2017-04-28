@@ -24,6 +24,27 @@
 
 (global-set-key (kbd "C-c t") 'toggle-truncate-lines)
 
+;;git gutter
+(add-to-list 'load-path "/home/masahiko/.emacs.d/git-gutter+.el")
+(require 'git-gutter+)
+(global-git-gutter+-mode t)
+(setq git-gutter+-separator-sign "|")
+(set-face-foreground 'git-gutter+-separator "yellow")
+(setq git-gutter+-modified-sign "=")
+(setq git-gutter+-added-sign "+")    ;; multiple character is OK
+(setq git-gutter+-deleted-sign "-")
+(set-face-foreground 'git-gutter+-added "green")
+(set-face-foreground 'git-gutter+-deleted "red")
+(global-set-key (kbd "C-x n") 'git-gutter+-next-hunk)
+(global-set-key (kbd "C-x p") 'git-gutter+-previous-hunk)
+(global-set-key (kbd "C-x v") 'git-gutter+-show-hunk)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x r") 'git-gutter+-revert-hunks)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x t") 'git-gutter+-stage-hunks)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x c") 'git-gutter+-commit)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x C") 'git-gutter+-stage-and-commit)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x C-y") 'git-gutter+-stage-and-commit-whole-buffer)
+		       ;;(define-key git-gutter+-mode-map (kbd "C-x U") 'git-gutter+-unstage-whole-buffer))
+
 (defun split-window-vertically-n (num_wins)
   (interactive "p")
   (if (= num_wins 2)
@@ -42,12 +63,13 @@
       (split-window-horizontally-n (- num_wins 1)))))
 (global-set-key "\C-x-" '(lambda ()
                            (interactive)
-                           (split-window-vertically-n 5)
+                           (split-window-vertically-n 3)
                            (toggle-truncate-lines)))
 (global-set-key "\C-x|" '(lambda ()
                            (interactive)
-                           (split-window-horizontally-n 5)
+                           (split-window-horizontally-n 3)
                            (toggle-truncate-lines)))
+(global-set-key "\C-cg" 'rgrep)
 
 
 ;; -*- mode: emacs-lisp -*-
@@ -81,8 +103,9 @@
 
 (add-hook 'c-mode-hook
           (defun postgresql-c-mode-hook ()
-            (when (string-match "/postgres\\(ql\\)?/" buffer-file-name)
-              (c-set-style "postgresql"))))
+              (c-set-style "postgresql")))
+
+
 
 
 ;;; Perl files
