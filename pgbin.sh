@@ -89,9 +89,12 @@ function init()
     do
 	VERSION=`s_to_version $OPT`
 	DATA=`s_to_dir $OPT`
+	CONF=$DATA/postgresql.conf
 	cd $PGBASE/$VERSION
 	rm -rf $DATA
 	bin/initdb -D $DATA -E UTF8 --no-locale
+	echo "wal_level = logical" >> $CONF
+	echo "max_wal_size = 10GB" >> $CONF
     done
     cd $P
 }
