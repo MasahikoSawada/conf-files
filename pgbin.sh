@@ -29,7 +29,7 @@ function start()
 	DATA=`s_to_dir $OPT`
 	cd $PGBASE/$VERSION
 
-	bin/pg_ctl start -D $DATA -o "-p $PORT" -c
+	bin/pg_ctl start -c -D $DATA -o "-p $PORT" -c
     done
 
     cd $P
@@ -45,7 +45,7 @@ function restart()
 	PORT=`s_to_port $OPT`
 	cd $PGBASE/$VERSION
 
-	bin/pg_ctl restart -D $DATA -mf -c
+	bin/pg_ctl restart -c -D $DATA -mf -c
     done
     cd $P
 }
