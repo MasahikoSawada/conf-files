@@ -93,8 +93,12 @@ function init()
 	cd $PGBASE/$VERSION
 	rm -rf $DATA
 	bin/initdb -D $DATA -E UTF8 --no-locale
-	echo "wal_level = logical" >> $CONF
-	echo "max_wal_size = 10GB" >> $CONF
+	case "$VERSION" in
+	    master|rmaster|node[0-9])
+		echo "wal_level = logical" >> $CONF
+		echo "max_wal_size = 10GB" >> $CONF
+		;;
+	esac
     done
     cd $P
 }
