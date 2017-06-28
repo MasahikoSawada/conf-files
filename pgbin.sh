@@ -13,11 +13,6 @@ PGBASE=/home/masahiko/pgsql
 # - p [version]
 # - list
 
-function error()
-{
-    echo "[ERROR] : " $@
-}
-
 function start()
 {
     P=`pwd`
@@ -89,16 +84,12 @@ function init()
     do
 	VERSION=`s_to_version $OPT`
 	DATA=`s_to_dir $OPT`
+	SETTING=`get_setting $VERSION`
 	CONF=$DATA/postgresql.conf
 	cd $PGBASE/$VERSION
 	rm -rf $DATA
 	bin/initdb -D $DATA -E UTF8 --no-locale
-	case "$VERSION" in
-	    master|rmaster|node[0-9])
-		echo "wal_level = logical" >> $CONF
-		echo "max_wal_size = 10GB" >> $CONF
-		;;
-	esac
+	echo -e "$SETTING" >> $CONF
     done
     cd $P
 }
@@ -337,4 +328,31 @@ function port_test()
     echo "Argument = $1"
     echo "version = $VERSION"
     echo "port = $PORT"
+}
+
+# Get setting string using version identifier
+function get_setting()
+{
+    r=""
+    case $1 in
+	master)
+	    r="
+wal_level = logical\n
+max_wal_size = 10GB\n
+"
+	    ;;
+	9.6.*)
+	    r="
+max_wal_size = 10GB\n
+"
+	    ;;
+    esac
+
+    # Add common setting
+    r=$r"
+max_prepared_transactions = 10\n
+log_line_prefix = '%m [%p] '\n
+"
+    echo -e $r
+    unset s
 }
