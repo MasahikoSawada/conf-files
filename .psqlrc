@@ -1,2 +1,5 @@
-\set PROMPT1 '%/(%l)%R%# '
-\set PROMPT2 '%/(%l)%R%# '
+\set PROMPT1 '%/(%l:%p)%R%# '
+\set PROMPT2 '%/(%l:%p)%R%# '
+\set 100 'select ''create table t'' || generate_series(1,100) || '' (c int)'';\\gexec'
+\set hoge 'create table hoge (c int);'
+\timing on
