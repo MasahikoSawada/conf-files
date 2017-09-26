@@ -1,14 +1,16 @@
 PGBASE=/home/masahiko/pgsql
 
 # Available functions are;
-# - start [version]
-# - restart [version]
-# - stop [version
-# - install_pg [version]
-# - init [version]
-# - full_setup [version]
+# - start <version> [...]
+# - restart <version> [...]
+# - stop <version> [...]
+# - install_pg <version>
+# - init <version> [...]
+# - full_setup <version>
+# - basebackup <version> <directory name>
+# - clean <version> [...]
 # - sync_rep [version] [num]
-# - rebuld [version] [options]
+# - rebuld <version> <options>
 # - pp { [version] ...} [options for psql including -c option]
 # - p [version]
 # - list
@@ -42,6 +44,40 @@ function restart()
 
 	bin/pg_ctl restart -c -D $DATA -mf -c
     done
+    cd $P
+}
+
+function clean()
+{
+    P=`pwd`
+    for OPT in "$@"
+    do
+	VERSION=`s_to_version $OPT`
+	DATA=`s_to_dir $OPT`
+	PORT=`s_to_port $OPT`
+	cd $PGBASE/$VERSION
+
+	rm -rf $DATA
+    done
+    cd $P
+}
+
+function basebackup()
+{
+    P=`pwd`
+
+    if [ $# -ne 2 ];then
+	echo "2 options required; version and backup directory name"
+	return
+    fi
+
+    VERSION=`s_to_version $1`
+    PORT=`s_to_port $OPT`
+    DATA=`s_to_dir $2`
+
+    cd $PGBASE/$VERSION
+    bin/pg_basebackup -D $DATA -p $PORT -P
+
     cd $P
 }
 
