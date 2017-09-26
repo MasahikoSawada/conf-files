@@ -286,9 +286,19 @@ function s_to_version()
 	    ;;
 	*)
 	    VERSION_1=`echo $1 | cut -b1`
-	    VERSION_2=`echo $1 | cut -b2`
-	    VERSION_3=`echo $1 | cut -b3-`
-	    echo "${VERSION_1}.${VERSION_2}.${VERSION_3}"
+	    if [ "$VERSION_1" == "1" ];then
+
+		# PostgreSQL 10 or later supports two-number version style.
+		# Perhaps it's enough to check whether the first number is 1 or not
+		# until PostgreSQL 20.0 released.
+		VERSION_1=`echo $1 | cut -b1-2`
+		VERSION_2=`echo $1 | cut -b3`
+		echo "${VERSION_1}.${VERSION_2}"
+	    else
+		VERSION_2=`echo $1 | cut -b2`
+		VERSION_3=`echo $1 | cut -b3-`
+		echo "${VERSION_1}.${VERSION_2}.${VERSION_3}"
+	    fi
 	    return
     esac
 }
@@ -350,7 +360,7 @@ max_wal_size = 10GB\n
 checkpoint_timeout = 1h\n
 "
 	    ;;
-	9.6.*)
+	9.6.*|10.*)
 	    r="
 max_wal_size = 10GB\n
 checkpoint_timeout = 1h\n
