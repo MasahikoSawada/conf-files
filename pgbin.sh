@@ -128,7 +128,6 @@ function rebuild()
     cd ${ORIG_PWD}
 }
 
-
 function pp()
 {
     unset command_opt
@@ -245,8 +244,9 @@ function list()
 }
 
 
-# Common functions
+##################################### Common functions #####################################
 
+# Convert (version string) -> (database cluster directory name)
 function s_to_dir()
 {
     case $1 in
@@ -272,7 +272,7 @@ function s_to_dir()
     esac
 }
 
-# Convert string to version number which is used for directory name
+# Convert (version string) -> (comma-separated version number, which is also used as the directory name)
 function s_to_version()
 {
     case $1 in
@@ -303,6 +303,7 @@ function s_to_version()
     esac
 }
 
+# Convert (version number) -> (port number)
 function s_to_port()
 {
     case $1 in
@@ -338,13 +339,16 @@ function s_to_port()
     esac
 }
 
-function port_test()
+# Test function of conversion
+function conv_test()
 {
     VERSION=`s_to_version $1`
     PORT=`s_to_port $1`
+    DIR=`s_to_dir $1`
 
     echo "Argument = $1"
     echo "version = $VERSION"
+    echo "Dir = $DIR"
     echo "port = $PORT"
 }
 
