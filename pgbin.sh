@@ -65,7 +65,7 @@ function install_pg()
 
     EXISTS=`ls -1 $PGBASE/$VERSION`
     if [ "$EXISTS" != "" ]; then
-	error "$VERSION already exits."
+	echo "$VERSION already exits."
 	return 1
     fi
     
@@ -149,7 +149,7 @@ function pp()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9] | shd[0-9] | pri)
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster'| 'orig' | node[0-9] | shd[0-9] | pri)
 		versions=("${versions[@]}" "$OPT")
 		shift
 		;;
@@ -201,7 +201,7 @@ function p()
 	fi
 
 	case $OPT in
-	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | node[0-9] | shd[0-9] | pri)
+	    [0-9][0-9][0-9] |  [0-9][0-9][0-9][0-9] | 'master' | 'rmaster' | 'orig' | node[0-9] | shd[0-9] | pri)
 		version="$OPT"
 		shift
 		;;
@@ -262,7 +262,7 @@ function s_to_dir()
 	    echo $1
 	    return
 	    ;;
-	master | [0-9]*)
+	master | [0-9]* | orig)
 	    echo "data"
 	    return
 	    ;;
@@ -278,6 +278,10 @@ function s_to_version()
     case $1 in
 	master|rmaster|node[0-9]|shd[0-9]|pri)
 	    echo "master"
+	    return
+	    ;;
+	orig)
+	    echo "orig"
 	    return
 	    ;;
 	*)
@@ -298,6 +302,10 @@ function s_to_port()
 	    ;;
 	rmaster)
 	    echo "5550"
+	    return
+	    ;;
+	orig)
+	    echo "9999"
 	    return
 	    ;;
 	node[0-9])
@@ -335,15 +343,17 @@ function get_setting()
 {
     r=""
     case $1 in
-	master)
+	master|orig)
 	    r="
 wal_level = logical\n
 max_wal_size = 10GB\n
+checkpoint_timeout = 1h\n
 "
 	    ;;
 	9.6.*)
 	    r="
 max_wal_size = 10GB\n
+checkpoint_timeout = 1h\n
 "
 	    ;;
     esac
