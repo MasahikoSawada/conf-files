@@ -320,6 +320,13 @@ function s_to_port()
     esac
 }
 
+function get_conf()
+{
+    DATA=`s_to_dir $1`
+    echo ${PGBASE}/${DATA}/postgresl.conf
+    return
+}
+
 function port_test()
 {
     VERSION=`s_to_version $1`
