@@ -144,3 +144,26 @@
 ;; use GNU make mode instead of plain make mode
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*Makefile.*" . makefile-gmake-mode))
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.mk\\'" . makefile-gmake-mode))
+
+
+;;; Configuration for modeline of emacs
+(setq-default mode-line-format
+              '("="
+                mode-line-modified
+                (line-number-mode "L%l-")
+                (column-number-mode "C%c-")
+                (-3 . "%p")    ; position 表示はいらないかなっと
+;               mode-line-mule-info
+;               mode-line-frame-identification
+                (which-func-mode ("" which-func-format "-"))
+                mode-line-buffer-identification
+;               " "
+;               " %[("
+;               mode-name
+;               mode-line-process
+;               minor-mode-alist
+;               "%n" ")%]-"
+                "-%-")
+              )
+(setq-default default-mode-line-format mode-line-format)
+
