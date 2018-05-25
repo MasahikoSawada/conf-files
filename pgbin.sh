@@ -24,7 +24,7 @@ function start()
 	VERSION=`s_to_version $OPT`
 	PORT=`s_to_port $OPT`
 	DATA=`s_to_dir $OPT`
-	cd $PGBASE/$VERSION
+	cd $PGBASE/$VERSION || return
 
 	bin/pg_ctl start -c -D $DATA -o "-p $PORT" -c
     done
@@ -40,7 +40,7 @@ function restart()
 	VERSION=`s_to_version $OPT`
 	DATA=`s_to_dir $OPT`
 	PORT=`s_to_port $OPT`
-	cd $PGBASE/$VERSION
+	cd $PGBASE/$VERSION || return
 
 	bin/pg_ctl restart -c -D $DATA -mf -c
     done
@@ -55,7 +55,7 @@ function clean()
 	VERSION=`s_to_version $OPT`
 	DATA=`s_to_dir $OPT`
 	PORT=`s_to_port $OPT`
-	cd $PGBASE/$VERSION
+	cd $PGBASE/$VERSION || break
 
 	rm -rf $DATA
     done
@@ -75,7 +75,7 @@ function basebackup()
     PORT=`s_to_port $OPT`
     DATA=`s_to_dir $2`
 
-    cd $PGBASE/$VERSION
+    cd $PGBASE/$VERSION || return
     bin/pg_basebackup -D $DATA -p $PORT -P
 
     cd $P
@@ -88,7 +88,7 @@ function stop()
     do
 	VERSION=`s_to_version $OPT`
 	DATA=`s_to_dir $OPT`
-	cd $PGBASE/$VERSION
+	cd $PGBASE/$VERSION || break
 	bin/pg_ctl stop -D $DATA -mf
     done
     cd $P
@@ -122,7 +122,7 @@ function init()
 	DATA=`s_to_dir $OPT`
 	SETTING=`get_setting $VERSION`
 	CONF=$DATA/postgresql.conf
-	cd $PGBASE/$VERSION
+	cd $PGBASE/$VERSION || break
 	rm -rf $DATA
 	bin/initdb -D $DATA -E UTF8 --no-locale
 	echo -e "$SETTING" >> $CONF
@@ -137,7 +137,7 @@ function full_setup()
 
     install_pg $1
     
-    cd $PGBASE/source/postgresql-${VERSION}
+    cd $PGBASE/source/postgresql-${VERSION} || return
     ./configure --prefix=$PGBASE/$VERSION --enable-debug --enable-cassert CFLAGS=-g
     make -j 4 -s
     make install -j 4 -s
@@ -154,7 +154,7 @@ function rebuild()
     OPTIONS=$@
     ORIG_PWD=`pwd`
 
-    cd $PGBASE/source/postgresql-${VERSION}
+    cd $PGBASE/source/postgresql-${VERSION} || return
     ./configure --prefix=$PGBASE/$VERSION --enable-debug --enable-cassert ${OPTIONS} CFLAGS=-g
 
     make clean -j 4 -s
@@ -264,13 +264,45 @@ function p()
 
 function sync_rep()
 {
-    VERSION=$1
-    NUM=$2
+
+    if [ $# -ne 2 ];then
+	echo "Required 2 options; the number of slaves and the replication type(p/l)"
+	return
+    fi
+
+    SLALVE_NUM=$1
+    REPL_TYPE=$2
+
+    if [ "$REPL_TYPE" != "p" -a "$REPL_TYPE" != "l" ];then
+	echo "invalid replication type : \"${REPL_TYPE}\""
+	return
+    fi
+	
     P=`pwd`
-
     cd $PGBASE/$VERSION
-    sh pgbin/syncrep.sh $NUM
 
+    # Stop and remove all servers
+    stop rmaster
+    clean rmaster
+    for i in `seq 1 $SLAVE_NUM`
+    do
+	stop node${i}
+	clean node${i}
+    done
+
+    if [ "$REPL_TYPE" == "l" ];then # logical replication
+	# Initialize all servers
+	init rmaster
+	start rmaster
+	
+	for i in `seq 1 $SLAVE_NUM`
+	do
+	    init node${i}
+	    start node${i}
+	done
+    elif [ "$REPL_TYPE" == "p" ];then # physical repliction
+	echo "hgoe"
+    fi
     cd $P
 }
 
@@ -308,7 +340,7 @@ function s_to_dir()
     esac
 }
 
-# Convert (version string) -> (comma-separated version number, which is also used as the directory name)
+# Convert (version string like 950) -> (comma-separated version number, which is also used as the directory name)
 function s_to_version()
 {
     case $1 in
@@ -398,6 +430,8 @@ function get_setting()
 wal_level = logical\n
 max_wal_size = 10GB\n
 checkpoint_timeout = 1h\n
+wal_sender_timeout = 0\n
+wal_receiver_timeout = 0\n
 "
 	    ;;
 	9.6.*|10.*)
