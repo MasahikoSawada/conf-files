@@ -9,6 +9,7 @@ PGBASE=/home/masahiko/pgsql
 # - full_setup <version>
 # - basebackup <version> <directory name>
 # - clean <version> [...]
+# - refresh <version> [...]
 # - sync_rep [version] [num]
 # - rebuld <version> <options>
 # - pp { [version] ...} [options for psql including -c option]
@@ -104,7 +105,7 @@ function install_pg()
 	echo "$VERSION already exits."
 	return 1
     fi
-    
+
     wget "https://ftp.postgresql.org/pub/source/v${VERSION}/postgresql-${VERSION}.tar.bz2"
     tar xjf postgresql-${VERSION}.tar.bz2 -C $PGBASE/source
     rm postgresql-${VERSION}.tar.bz2
@@ -136,14 +137,14 @@ function full_setup()
     ORIG_PWD=`pwd`
 
     install_pg $1
-    
+
     cd $PGBASE/source/postgresql-${VERSION} || return
     ./configure --prefix=$PGBASE/$VERSION --enable-debug --enable-cassert CFLAGS=-g
     make -j 4 -s
     make install -j 4 -s
 
     init $1
-    
+
     cd ${ORIG_PWD}
 }
 
@@ -277,7 +278,7 @@ function sync_rep()
 	echo "invalid replication type : \"${REPL_TYPE}\""
 	return
     fi
-	
+
     P=`pwd`
     cd $PGBASE/$VERSION
 
@@ -294,7 +295,7 @@ function sync_rep()
 	# Initialize all servers
 	init rmaster
 	start rmaster
-	
+
 	for i in `seq 1 $SLAVE_NUM`
 	do
 	    init node${i}
@@ -304,6 +305,15 @@ function sync_rep()
 	echo "hgoe"
     fi
     cd $P
+}
+
+function refresh()
+{
+    stop $@
+    clean $@
+    init $@
+    start $@
+
 }
 
 function list()
@@ -439,12 +449,14 @@ max_wal_size = 10GB\n
 checkpoint_timeout = 1h\n
 wal_sender_timeout = 0\n
 wal_receiver_timeout = 0\n
+max_replication_slots = 8\n
 "
 	    ;;
 	9.6.*|10.*)
 	    r="
 max_wal_size = 10GB\n
 checkpoint_timeout = 1h\n
+max_replication_slots = 8\n
 "
 	    ;;
     esac
