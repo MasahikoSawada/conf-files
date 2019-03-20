@@ -1,7 +1,18 @@
+(add-to-list 'load-path "/home/masahiko/.emacs.d/package.el")
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "http://melpa.milkbox.net/packages/") t)
+(add-to-list 'package-archives '("marmalade" . "http://marmalade-repo.org/packages/") t)
+;;(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/") t)
+(add-to-list 'package-archives '("melpa-stable" . "https://stable.melpa.org/packages/") t)
+(add-to-list 'package-archives  '("marmalade" . "http://marmalade-repo.org/packages/") t)
+(add-to-list 'package-archives '("org" . "http://orgmode.org/elpa/") t)
+(package-initialize)
+
 (global-set-key (kbd "C-c <left>")  'windmove-left)
 (global-set-key (kbd "C-c <down>")  'windmove-down)
 (global-set-key (kbd "C-c <up>")    'windmove-up)
 (global-set-key (kbd "C-c <right>") 'windmove-right)
+(global-set-key (kbd "C-c g") 'rgrep)
 (which-function-mode 1)
 (setq make-backup-files nil)
 ;;; .#* とかのバックアップファイルを作らない
@@ -25,7 +36,7 @@
 (global-set-key (kbd "C-c t") 'toggle-truncate-lines)
 
 ;;git gutter
-(add-to-list 'load-path "/home/masahiko/.emacs.d/git-gutter+.el")
+;;(add-to-list 'load-path "/home/masahiko/.emacs.d/git-gutter+.el")
 (require 'git-gutter+)
 (global-git-gutter+-mode t)
 (setq git-gutter+-separator-sign "|")
@@ -101,12 +112,9 @@
                (indent-tabs-mode . t)
                (tab-width . 4)))
 
-(add-hook 'c-mode-hook
-          (defun postgresql-c-mode-hook ()
-              (c-set-style "postgresql")))
-
-
-
+(add-hook 'c-mode-hook 
+         (defun postgresql-c-mode-hook ()
+	   (c-set-style "postgresql")))
 
 ;;; Perl files
 
@@ -144,26 +152,151 @@
 ;; use GNU make mode instead of plain make mode
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*Makefile.*" . makefile-gmake-mode))
 (add-to-list 'auto-mode-alist '("/postgres\\(ql\\)?/.*\\.mk\\'" . makefile-gmake-mode))
+(add-to-list 'load-path "/home/masahiko/.emacs.d/go-mode")
+(add-to-list 'load-path "/home/masahiko/.emacs.d/auto-complete")
+(add-to-list 'load-path "/home/masahiko/.emacs.d/popup-el")
+(require 'go-mode)
+(require 'go-mode-autoloads)
+(add-hook 'go-mode-hook
+	  '(lambda()
+		  (setq c-basic-offset 4)
+		  (setq indent-tabs-mode t)
+		  (local-set-key (kbd "M-.") 'godef-jump)
+		  (local-set-key (kbd "C-c C-r") 'go-remove-unused-imports)
+		  (local-set-key (kbd "C-C i") 'go-goto-imports)
+		  (local-set-key (kbd "C-c d") 'godoc)))
+(add-hook 'before-save-hook 'gofmt-before-save)
+(require 'go-autocomplete)
+(require 'auto-complete-config)
+
+(global-hl-line-mode t)                   ;; 現在行をハイライト
+(show-paren-mode t)                       ;; 対応する括弧をハイライト
+(setq show-paren-style 'mixed)            ;; 括弧のハイライトの設定。
+(transient-mark-mode t)                   ;; 選択範囲をハイライト
+
+(defun markdown-preview-by-eww ()
+  (interactive)
+  (message (buffer-file-name))
+  (call-process "grip" nil nil nil
+		(buffer-file-name)
+		"--export"
+		"/tmp/grip.html")
+  (let ((buf (current-buffer)))
+    (eww-open-file "/tmp/grip.html")
+    (switch-to-buffer buf)
+    (pop-to-buffer "*eww*")))
+(global-set-key "\C-x\C-d" 'markdown-preview-by-eww)
+
+(cua-mode t)
+(setq cua-enable-cua-keys nil)
+(global-set-key "\C-x\C-\ " 'cua-set-rectangle-mark)
+
+(add-to-list 'load-path "~/.emacs.d/rust-mode/")
+(autoload 'rust-mode "rust-mode" nil t)
+(add-to-list 'auto-mode-alist '("\\.rs\\'" . rust-mode))
+
+(setq-default show-trailing-whitespace t)
+
+;(split-window-horizontally)
+;(split-window-horizontally)
+;(balance-windows)
 
 
-;;; Configuration for modeline of emacs
+; Load smart mode line
+(add-to-list 'load-path "/home/masahiko/.emacs.d/rich-minority")
+(require 'rich-minority)
+(add-to-list 'load-path "/home/masahiko/.emacs.d/smart-mode-line")
+
+(line-number-mode t) ;; display line number
+(column-number-mode t) ;; display column number
+;; mode-line-format customization
 (setq-default mode-line-format
-              '("="
-                mode-line-modified
-                (line-number-mode "L%l-")
-                (column-number-mode "C%c-")
-                (-3 . "%p")    ; position 表示はいらないかなっと
-;               mode-line-mule-info
-;               mode-line-frame-identification
-                (which-func-mode ("" which-func-format "-"))
-                mode-line-buffer-identification
-;               " "
-;               " %[("
-;               mode-name
-;               mode-line-process
-;               minor-mode-alist
-;               "%n" ")%]-"
-                "-%-")
-              )
+	      '("="
+		mode-line-modified
+		(line-number-mode "L%l-")
+		(column-number-mode "C%c-")
+		(-3 . "%p")    ; position 表示はいらないかなっと
+;		mode-line-mule-info
+;		mode-line-frame-identification
+		(which-func-mode ("" which-func-format "-"))
+		mode-line-buffer-identification
+;		" "
+;		" %[("
+;		mode-name
+;		mode-line-process
+;		minor-mode-alist
+;		"%n" ")%]-"
+		"-%-")
+	      )
 (setq-default default-mode-line-format mode-line-format)
 
+(setq imenu-create-index-function
+      (lambda ()
+	(let ((end))
+	  (beginning-of-buffer)
+	  (re-search-forward "^%%")
+	  (forward-line 1)
+	  (setq end (save-excursion (re-search-forward "^%%") (point)))
+	  (loop while (re-search-forward "^\\([a-z].*?\\)\\s-*\n?\\s-*:" end t)
+		collect (cons (match-string 1) (point))))))
+
+(add-to-list 'load-path "/home/masahiko/.emacs.d/irony-mode")
+(add-to-list 'load-path "/home/masahiko/.emacs.d/company-irony")
+(require 'irony)
+(eval-after-load 'company
+  '(add-to-list 'company-backends 'company-irony))
+(ac-config-default)
+
+
+(require 'auto-complete-config)
+(ac-config-default)
+(add-to-list 'ac-modes 'text-mode)         ;; text-modeでも自動的に有効にする
+(add-to-list 'ac-modes 'fundamental-mode)  ;; fundamental-mode
+(add-to-list 'ac-modes 'org-mode)
+(add-to-list 'ac-modes 'yatex-mode)
+(ac-set-trigger-key "TAB")
+(setq ac-use-menu-map t)       ;; 補完メニュー表示時にC-n/C-pで補完候補選択
+(setq ac-use-fuzzy t)          ;; 曖昧マッチ
+
+(require 'helm)
+(require 'helm-config)
+(helm-mode 1)
+
+;; helm setting
+(require 'helm-etags-plus)
+(defun helm-etags-plus-myselect(&optional arg)
+  "Find Tag using `etags' and `helm'"
+  (interactive "P")
+  (cond
+   ((equal arg '(4))                  ;C-u
+    (helm-etags-plus-select-internal)) ;waiting for you input pattern
+   (t (helm-etags-plus-select-internal ""))))  ;use thing-at-point as symbol
+
+(global-set-key "\M-." 'helm-etags-plus-myselect)
+;(global-set-key "\M-." 'helm-etags-plus-select)
+;;go back directly
+(global-set-key "\M-*" 'helm-etags-plus-history-go-back)
+;;list all visited tags
+(global-set-key "\M-," 'helm-etags-plus-history)
+;;go forward directly
+(global-set-key "\M-/" 'helm-etags-plus-history-go-forward)
+(define-key helm-find-files-map (kbd "TAB") 'helm-execute-persistent-action)
+(define-key helm-read-file-map (kbd "TAB") 'helm-execute-persistent-action)
+
+
+(add-to-list 'load-path "/home/masahiko/.emacs.d/helm-gdb")
+(require 'helm-gdb)
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(package-selected-packages
+   (quote
+    (helm-migemo migemo projectile helm-etags-plus git-gutter+))))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
