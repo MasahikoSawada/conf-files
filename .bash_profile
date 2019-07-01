@@ -17,10 +17,12 @@ alias gdb='emacs -f gdb'
 alias c='./configure --prefix=/home/masahiko/pgsql/master --enable-debug --enable-cassert --enable-depend --enable-tap-tests CFLAGS=-g'
 alias cc='./configure --prefix=/home/masahiko/pgsql/master --enable-debug --enable-cassert --enable-depend --enable-tap-tests CFLAGS=-g && make clean && make -j 8 install -s'
 alias m='echo "" > /home/masahiko/source/postgresql/src/Makefile.custom; make -j 4 -s'
+alias mi='echo "" > /home/masahiko/source/postgresql/src/Makefile.custom; make -j 4 -s install'
 alias mm='echo "COPT=-Wall -Werror -DCOPY_PARSE_PLAN_TREES -DRAW_EXPRESSION_COVERAGE_TEST" > /home/masahiko/source/postgresql/src/Makefile.custom; make -j 4 -s'
 alias remove-uufiles='find . | egrep "\.rej|\.orig" | xargs rm'
 alias show-uufiles='find . | egrep "\.rej|\.orig"'
 alias gs='git status | egrep -v "rej|orig|TAGS"'
+alias et='sh src/tools/make_etags'
 
 PATH=$PATH:$HOME/bin
 GIT_PS1_SHOWDIRTYSTATE=true
